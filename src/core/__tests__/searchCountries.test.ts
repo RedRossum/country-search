@@ -36,9 +36,10 @@ describe('searchCountries & HttpError', () => {
     const result = await searchCountries('New Zealand', controller.signal);
 
     expect(fetchMock).toHaveBeenCalledTimes(1);
-    expect(fetchMock).toHaveBeenCalledWith('https://countries.dev', {
+    expect(fetchMock).toHaveBeenCalledWith('https://countries.dev/name/New%20Zealand', {
       signal: controller.signal,
     });
+
     expect(result).toHaveLength(1);
     expect(result[0]?.name).toBe('Spain');
     expect(result[0]?.capital).toBe('Madrid');
