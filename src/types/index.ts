@@ -48,3 +48,5 @@ export interface DebouncedFunction<TArgs extends unknown[]> {
   (...args: TArgs): void;
   cancel: () => void;
 }
+//searchCountries
+export type SearchCountriesFn = (query: string, signal?: AbortSignal) => Promise<Country[]>;
