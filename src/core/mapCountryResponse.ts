@@ -1,4 +1,4 @@
-import type { Country, RawCountry } from '../types';
+import type { Country, RawCountry } from '../types/index';
 
 export function mapCountryResponse(raw: RawCountry): Country {
   const flagUrl = raw.flags?.svg ?? raw.flags?.png ?? raw.flag ?? '';
