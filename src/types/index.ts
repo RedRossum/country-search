@@ -41,3 +41,10 @@ export interface Country {
   languages: string[];
   currencies: string[];
 }
+//
+export type TimerId = ReturnType<typeof setTimeout>;
+
+export interface DebouncedFunction<TArgs extends unknown[]> {
+  (...args: TArgs): void;
+  cancel: () => void;
+}
