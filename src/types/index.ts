@@ -50,7 +50,7 @@ export interface DebouncedFunction<TArgs extends unknown[]> {
 }
 //searchCountries
 export type SearchCountriesFn = (query: string, signal?: AbortSignal) => Promise<Country[]>;
-//
+//timeout handling and error classification
 export type SearchErrorKind = 'abort' | 'timeout' | 'http' | 'network';
 
 export interface ClassifiedSearchError {
@@ -61,3 +61,29 @@ export interface ClassifiedSearchError {
 
 export type SearchOutcome =
   { ok: true; countries: Country[] } | { ok: false; error: ClassifiedSearchError };
+//
+export type SearchStatus = 'idle' | 'loading' | 'success' | 'empty' | 'error';
+
+export interface SearchState {
+  status: SearchStatus;
+  query: string;
+  countries: Country[];
+  errorMessage: string | null;
+}
+
+export type SearchStateListener = (state: SearchState) => void;
+
+export interface SearchControllerOptions {
+  debounceDelayMs?: number;
+  timeoutMs?: number;
+  searchFn?: (query: string, signal?: AbortSignal, timeoutMs?: number) => Promise<SearchOutcome>;
+}
+
+export interface SearchController {
+  getState: () => SearchState;
+  subscribe: (listener: SearchStateListener) => () => void;
+  handleInput: (rawQuery: string) => void;
+  retry: () => void;
+  clear: () => void;
+  dispose: () => void;
+}
