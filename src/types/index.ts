@@ -50,3 +50,14 @@ export interface DebouncedFunction<TArgs extends unknown[]> {
 }
 //searchCountries
 export type SearchCountriesFn = (query: string, signal?: AbortSignal) => Promise<Country[]>;
+//
+export type SearchErrorKind = 'abort' | 'timeout' | 'http' | 'network';
+
+export interface ClassifiedSearchError {
+  kind: SearchErrorKind;
+  message: string;
+  status?: number;
+}
+
+export type SearchOutcome =
+  { ok: true; countries: Country[] } | { ok: false; error: ClassifiedSearchError };
