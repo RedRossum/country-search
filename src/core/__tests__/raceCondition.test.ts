@@ -59,7 +59,7 @@ describe('createSearchController & race condition handling', () => {
 
     const resolveSecond = resolversByQuery.get('spain');
     resolveSecond?.({ ok: true, countries: [makeCountry('Spain')] });
-    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(controller.getState()).toEqual({
       status: 'success',
@@ -70,11 +70,11 @@ describe('createSearchController & race condition handling', () => {
 
     const resolveFirst = resolversByQuery.get('sp');
     resolveFirst?.({ ok: true, countries: [makeCountry('Singapore')] });
-    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(controller.getState().status).toBe('success');
     expect(controller.getState().countries).toHaveLength(1);
-    expect(controller.getState().countries?.name).toBe('Spain');
+    expect(controller.getState().countries.at(0)?.name).toBe('Spain');
   });
 
   it('cancels pending/active requests and resets to idle when input becomes empty or whitespace', async () => {
@@ -99,10 +99,10 @@ describe('createSearchController & race condition handling', () => {
     controller.handleInput('italy');
     await vi.advanceTimersByTimeAsync(300);
     expect(mockSearchFn).toHaveBeenCalledTimes(1);
-    expect(signals?.aborted).toBe(false);
+    expect(signals.at(0)?.aborted).toBe(false);
 
     controller.handleInput('');
-    expect(signals?.aborted).toBe(true);
+    expect(signals.at(0)?.aborted).toBe(true);
     expect(controller.getState()).toEqual({
       status: 'idle',
       query: '',
@@ -135,12 +135,12 @@ describe('createSearchController & race condition handling', () => {
     expect(controller.getState().errorMessage).toBe('Ошибка сети.');
 
     controller.retry();
-    await Promise.resolve();
+    await vi.advanceTimersByTimeAsync(0);
 
     expect(mockSearchFn).toHaveBeenCalledTimes(2);
     expect(mockSearchFn).toHaveBeenLastCalledWith('norway', expect.any(AbortSignal), 5000);
     expect(controller.getState().status).toBe('success');
-    expect(controller.getState().countries?.name).toBe('Norway');
+    expect(controller.getState().countries.at(0)?.name).toBe('Norway');
   });
 
   it('returns cached results for repeated normalized queries without extra network calls', async () => {
@@ -165,6 +165,6 @@ describe('createSearchController & race condition handling', () => {
 
     expect(mockSearchFn).toHaveBeenCalledTimes(1);
     expect(controller.getState().status).toBe('success');
-    expect(controller.getState().countries?.name).toBe('France');
+    expect(controller.getState().countries.at(0)?.name).toBe('France');
   });
 });
