@@ -35,3 +35,14 @@
   - **Пространственная сложность:** $O(U \cdot M)$, где $U$ — число уникальных поисковых запросов в сессии, $M$ — среднее число стран в ответе.
 - **Дедупликация активных запросов (`inFlight: Map<string, InFlightRequest>`):**
   - Проверка наличия уже выполняющегося идентичного запроса и регистрация подписчика выполняются за $O(1)$ в среднем.
+
+## 5. Принципы чистого кода и разделение ответственности
+
+- **Изоляция бизнес-логики от DOM (`src/core/` vs `src/components/`, `src/index.ts`):**
+  - Весь сетевой слой (`searchCountries`, `searchWithTimeout`), управление таймерами (`debounce`), работа с `localStorage` (`searchHistory`) и конечный автомат состояний (`createSearchController`) не содержат обращений к `document` или DOM-элементам.
+  - Слой представления (`src/index.ts`, `src/components/countryCard.ts`, `src/components/countryModal.ts`, `src/components/statusViews.ts`) подписывается на изменения состояния через `controller.subscribe(renderState)` и занимается только отрисовкой. Это позволяет покрыть всю логику поиска, отмены запросов и кэширования быстрыми юнит-тестами без поднятия интерфейса.
+- **Единственная ответственность (SRP) и чистые функции:**
+  - `mapCountryResponse` (`src/core/mapCountryResponse.ts`) отвечает исключительно за преобразование сырого DTO от `countries.dev` в нормализованную модель `Country` с гарантированными дефолтными значениями и без мутации исходных данных.
+  - `classifySearchError` (`src/core/searchWithTimeout.ts`) инкапсулирует разбор исключений (`HttpError`, `AbortError`, `TimeoutError`, сетевой сбой) в типизированный объект `ClassifiedSearchError`, избавляя UI от проверок `instanceof` и кодов статуса.
+- **Защита от XSS при работе с DOM:**
+  - Во всех компонентах интерфейса (`countryCard.ts`, `countryModal.ts`, `statusViews.ts`, `index.ts`) полностью исключены `innerHTML` и `insertAdjacentHTML`. Данные из API и пользовательский ввод вставляются исключительно через `textContent` и `replaceChildren` / `append`.
